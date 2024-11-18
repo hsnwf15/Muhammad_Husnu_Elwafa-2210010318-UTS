@@ -1,3 +1,5 @@
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -188,9 +190,8 @@ public class CatatanFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         txtCatatan = new javax.swing.JTextArea();
         jPanel5 = new javax.swing.JPanel();
-        btnEdit = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        btnSimpanEdit = new javax.swing.JButton();
         txtJudul = new javax.swing.JTextField();
         jDateChooser = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
@@ -200,6 +201,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnEkspor = new javax.swing.JButton();
         btnImpor = new javax.swing.JButton();
         btnHapus = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -231,22 +233,6 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(230, 186, 69));
         jPanel5.setLayout(new java.awt.GridBagLayout());
 
-        btnEdit.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Edit.png"))); // NOI18N
-        btnEdit.setText("Edit");
-        btnEdit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEditActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 7;
-        gridBagConstraints.ipady = 7;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        jPanel5.add(btnEdit, gridBagConstraints);
-
         btnSimpan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnSimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Save.png"))); // NOI18N
         btnSimpan.setText("Simpan");
@@ -264,15 +250,21 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         jPanel5.add(btnSimpan, gridBagConstraints);
 
-        jButton5.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Close.png"))); // NOI18N
+        btnSimpanEdit.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnSimpanEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Done.png"))); // NOI18N
+        btnSimpanEdit.setEnabled(false);
+        btnSimpanEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanEditActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 7;
         gridBagConstraints.ipady = 7;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        jPanel5.add(jButton5, gridBagConstraints);
+        jPanel5.add(btnSimpanEdit, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -336,12 +328,17 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel3.add(btnCatatanBaru, gridBagConstraints);
 
         listCatatan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        listCatatan.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                listCatatanValueChanged(evt);
+            }
+        });
         jScrollPane2.setViewportView(listCatatan);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 3;
+        gridBagConstraints.gridheight = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 150;
         gridBagConstraints.ipady = 200;
@@ -357,7 +354,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 0);
         jPanel3.add(btnEkspor, gridBagConstraints);
@@ -371,7 +368,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         jPanel3.add(btnImpor, gridBagConstraints);
 
@@ -384,10 +381,24 @@ public class CatatanFrame extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 11);
         jPanel3.add(btnHapus, gridBagConstraints);
+
+        btnEdit.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Edit.png"))); // NOI18N
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 11);
+        jPanel3.add(btnEdit, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -437,6 +448,10 @@ public class CatatanFrame extends javax.swing.JFrame {
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
         btnSimpan.setEnabled(true);
+        
+        jDateChooser.setCalendar(null);
+        txtJudul.setText("Judul");
+        txtCatatan.setText("");
         jDateChooser.requestFocusInWindow();
     }//GEN-LAST:event_btnCatatanBaruActionPerformed
 
@@ -456,9 +471,11 @@ public class CatatanFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        jDateChooser.setEnabled(true);
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
-        btnSimpan.setEnabled(true);
+        btnSimpan.setEnabled(false);
+        btnSimpanEdit.setEnabled(true);
     }//GEN-LAST:event_btnEditActionPerformed
 
     
@@ -494,6 +511,64 @@ public class CatatanFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnImporActionPerformed
 
+    private void listCatatanValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listCatatanValueChanged
+        if (!evt.getValueIsAdjusting()) { // Mencegah event dipicu dua kali
+            String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih
+            if (selectedJudul != null) {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT * FROM catatan WHERE judul = ?")) {
+                    stmt.setString(1, selectedJudul); // Cari data berdasarkan judul
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            // Tampilkan data ke komponen input
+                            txtJudul.setText(rs.getString("judul"));
+                            txtCatatan.setText(rs.getString("catatan"));
+                            jDateChooser.setDate(new SimpleDateFormat("yyyy-MM-dd")
+                                    .parse(rs.getString("tanggal")));
+
+                            // Pastikan komponen tetap tidak aktif
+                            txtJudul.setEnabled(false);
+                            txtCatatan.setEnabled(false);
+                            jDateChooser.setEnabled(false);
+                        }
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Gagal memuat data: " + ex.getMessage());
+                }
+            }
+        }
+    }//GEN-LAST:event_listCatatanValueChanged
+
+    private void btnSimpanEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanEditActionPerformed
+        String judulBaru = txtJudul.getText();
+        String catatanBaru = txtCatatan.getText();
+        String tanggalBaru = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
+        String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul asli dari JList
+
+        if (selectedJudul != null) {
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "UPDATE catatan SET judul = ?, catatan = ?, tanggal = ? WHERE judul = ?")) {
+                stmt.setString(1, judulBaru); // Judul baru
+                stmt.setString(2, catatanBaru); // Isi catatan baru
+                stmt.setString(3, tanggalBaru); // Tanggal baru
+                stmt.setString(4, selectedJudul); // Judul asli untuk menemukan data yang akan diupdate
+                stmt.executeUpdate(); // Eksekusi query
+
+                JOptionPane.showMessageDialog(this, "Catatan berhasil diperbarui!");
+                loadCatatan(); // Refresh daftar catatan di JList
+
+                // Nonaktifkan kembali komponen input
+                txtJudul.setEnabled(false);
+                txtCatatan.setEnabled(false);
+                jDateChooser.setEnabled(false);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Gagal memperbarui catatan: " + ex.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih catatan untuk diperbarui!");
+        }
+    }//GEN-LAST:event_btnSimpanEditActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -521,7 +596,7 @@ public class CatatanFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnHapus;
     private javax.swing.JButton btnImpor;
     private javax.swing.JButton btnSimpan;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton btnSimpanEdit;
     private com.toedter.calendar.JDateChooser jDateChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
