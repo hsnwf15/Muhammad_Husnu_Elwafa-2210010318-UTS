@@ -38,7 +38,7 @@ public class CatatanFrame extends javax.swing.JFrame {
     
     private void connectToDatabase() {
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:catatan.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:E:/kuliah/PBO2/Muhammad_Husnu_Elwafa-2210010318-UTS/src/catatan.db");
             System.out.println("Koneksi berhasil ke database!");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Koneksi database gagal: " + e.getMessage());
@@ -48,7 +48,7 @@ public class CatatanFrame extends javax.swing.JFrame {
     private void loadCatatan() {
         listModel.clear();
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
             while (rs.next()) {
                 listModel.addElement(rs.getString("judul"));
             }
@@ -59,7 +59,7 @@ public class CatatanFrame extends javax.swing.JFrame {
     
     private void simpanCatatan(String judul, String catatan, String tanggal) {
         try (PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO catatan (judul, catatan, tanggal) VALUES (?, ?, ?)")) {
+            "INSERT INTO catatan (judul, catatan, tanggal) VALUES (?, ?, ?)")) {
             stmt.setString(1, judul);
             stmt.setString(2, catatan);
             stmt.setString(3, tanggal);
@@ -172,7 +172,6 @@ public class CatatanFrame extends javax.swing.JFrame {
         listCatatan = new javax.swing.JList<>();
         btnEkspor = new javax.swing.JButton();
         btnImpor = new javax.swing.JButton();
-        jPanel4 = new javax.swing.JPanel();
         btnHapus = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -192,13 +191,14 @@ public class CatatanFrame extends javax.swing.JFrame {
         txtCatatan.setRows(5);
         txtCatatan.setBorder(null);
         txtCatatan.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        txtCatatan.setEnabled(false);
         jScrollPane1.setViewportView(txtCatatan);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipadx = 225;
-        gridBagConstraints.ipady = 200;
+        gridBagConstraints.ipadx = 451;
+        gridBagConstraints.ipady = 300;
         jPanel2.add(jScrollPane1, gridBagConstraints);
 
         jPanel5.setBackground(new java.awt.Color(230, 186, 69));
@@ -270,6 +270,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel2.add(txtJudul, gridBagConstraints);
 
         jDateChooser.setBackground(new java.awt.Color(230, 139, 69));
+        jDateChooser.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -307,11 +308,6 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel3.add(btnCatatanBaru, gridBagConstraints);
 
         listCatatan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        listCatatan.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "-" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane2.setViewportView(listCatatan);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -320,6 +316,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.gridheight = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 150;
+        gridBagConstraints.ipady = 200;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         jPanel3.add(jScrollPane2, gridBagConstraints);
 
@@ -349,13 +346,6 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         jPanel3.add(btnImpor, gridBagConstraints);
-
-        jPanel4.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 2;
-        jPanel3.add(jPanel4, gridBagConstraints);
 
         btnHapus.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnHapus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Trash.png"))); // NOI18N
@@ -404,23 +394,27 @@ public class CatatanFrame extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 553, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCatatanBaruActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCatatanBaruActionPerformed
+        jDateChooser.setEnabled(true);
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
         btnSimpan.setEnabled(true);
     }//GEN-LAST:event_btnCatatanBaruActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+//        jDateChooser.setCalendar();
+        txtJudul.setText("Judul");
+        txtCatatan.setText("");
         String judul = txtJudul.getText();
         String catatan = txtCatatan.getText();
         String tanggal = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
@@ -497,7 +491,6 @@ public class CatatanFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
