@@ -86,6 +86,33 @@ public class CatatanFrame extends javax.swing.JFrame {
         }
     }
     
+    private void tampilkanDataCatatan(String judul) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT * FROM catatan WHERE judul = ?")) {
+            stmt.setString(1, judul);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Ambil data dari database
+                    String tanggal = rs.getString("tanggal");
+                    String isiCatatan = rs.getString("catatan");
+
+                    // Tampilkan data ke form
+                    jDateChooser.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(tanggal));
+                    txtJudul.setText(judul);
+                    txtCatatan.setText(isiCatatan);
+
+                    // Nonaktifkan form (hanya untuk tampilan, tidak bisa diubah)
+                    txtJudul.setEnabled(false);
+                    txtCatatan.setEnabled(false);
+                    jDateChooser.setEnabled(false);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal menampilkan data: " + e.getMessage());
+        }
+    }
+
+    
     private void hapusCatatan(int id) {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "DELETE FROM catatan WHERE id = ?")) {
@@ -223,6 +250,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnSimpan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnSimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Save.png"))); // NOI18N
         btnSimpan.setText("Simpan");
+        btnSimpan.setEnabled(false);
         btnSimpan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSimpanActionPerformed(evt);
@@ -409,16 +437,22 @@ public class CatatanFrame extends javax.swing.JFrame {
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
         btnSimpan.setEnabled(true);
+        jDateChooser.requestFocusInWindow();
     }//GEN-LAST:event_btnCatatanBaruActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-//        jDateChooser.setCalendar();
-        txtJudul.setText("Judul");
-        txtCatatan.setText("");
         String judul = txtJudul.getText();
         String catatan = txtCatatan.getText();
         String tanggal = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
         simpanCatatan(judul, catatan, tanggal);
+        jDateChooser.setCalendar(null);
+        txtJudul.setText("Judul");
+        txtCatatan.setText("");
+        
+        jDateChooser.setEnabled(false);
+        txtJudul.setEnabled(false);
+        txtCatatan.setEnabled(false);
+        btnSimpan.setEnabled(false);
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
@@ -427,6 +461,8 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnSimpan.setEnabled(true);
     }//GEN-LAST:event_btnEditActionPerformed
 
+    
+    
     private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
         String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih di JList
         if (selectedJudul != null) {
