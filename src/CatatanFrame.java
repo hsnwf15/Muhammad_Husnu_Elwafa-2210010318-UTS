@@ -3,6 +3,13 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import javax.swing.UIManager;
+import com.toedter.calendar.JDateChooser; // Untuk JDateChooser
+import java.sql.*; // Untuk SQLite
+import javax.swing.*; // Untuk Swing
+import javax.swing.filechooser.FileNameExtensionFilter; // Untuk FileChooser
+import java.io.*; // Untuk ekspor dan impor CSV
+import java.text.SimpleDateFormat; // Untuk format tanggal
+
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -20,6 +27,19 @@ public class CatatanFrame extends javax.swing.JFrame {
      */
     public CatatanFrame() {
         initComponents();
+        
+    }
+    
+    private Connection conn; // Koneksi ke SQLite
+    private DefaultListModel<String> listModel; // Model untuk JList
+    
+    private void connectToDatabase() {
+        try {
+            conn = DriverManager.getConnection("jdbc:sqlite:catatan.db");
+            System.out.println("Koneksi berhasil ke database!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Koneksi database gagal: " + e.getMessage());
+        }
     }
 
     /**
@@ -35,21 +55,21 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        txtCatatan = new javax.swing.JTextArea();
         jPanel5 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnSimpan = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
+        txtJudul = new javax.swing.JTextField();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnCatatanBaru = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
-        jButton4 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        listCatatan = new javax.swing.JList<>();
+        btnEkspor = new javax.swing.JButton();
+        btnImpor = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
-        jButton7 = new javax.swing.JButton();
+        btnHapus = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -61,14 +81,14 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel2.setBackground(new java.awt.Color(230, 139, 69));
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
-        jTextArea1.setBackground(new java.awt.Color(230, 139, 69));
-        jTextArea1.setColumns(20);
-        jTextArea1.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jTextArea1.setForeground(new java.awt.Color(255, 255, 255));
-        jTextArea1.setRows(5);
-        jTextArea1.setBorder(null);
-        jTextArea1.setDisabledTextColor(new java.awt.Color(255, 255, 255));
-        jScrollPane1.setViewportView(jTextArea1);
+        txtCatatan.setBackground(new java.awt.Color(230, 139, 69));
+        txtCatatan.setColumns(20);
+        txtCatatan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        txtCatatan.setForeground(new java.awt.Color(255, 255, 255));
+        txtCatatan.setRows(5);
+        txtCatatan.setBorder(null);
+        txtCatatan.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        jScrollPane1.setViewportView(txtCatatan);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -80,27 +100,27 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel5.setBackground(new java.awt.Color(230, 186, 69));
         jPanel5.setLayout(new java.awt.GridBagLayout());
 
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Edit.png"))); // NOI18N
-        jButton2.setText("Edit");
+        btnEdit.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Edit.png"))); // NOI18N
+        btnEdit.setText("Edit");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 7;
         gridBagConstraints.ipady = 7;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        jPanel5.add(jButton2, gridBagConstraints);
+        jPanel5.add(btnEdit, gridBagConstraints);
 
-        jButton3.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Save.png"))); // NOI18N
-        jButton3.setText("Simpan");
+        btnSimpan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnSimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Save.png"))); // NOI18N
+        btnSimpan.setText("Simpan");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 7;
         gridBagConstraints.ipady = 7;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        jPanel5.add(jButton3, gridBagConstraints);
+        jPanel5.add(btnSimpan, gridBagConstraints);
 
         jButton5.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Close.png"))); // NOI18N
@@ -120,20 +140,20 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanel2.add(jPanel5, gridBagConstraints);
 
-        jTextField1.setBackground(new java.awt.Color(230, 139, 69));
-        jTextField1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jTextField1.setForeground(new java.awt.Color(255, 255, 255));
-        jTextField1.setText("Judul");
-        jTextField1.setBorder(null);
-        jTextField1.setDisabledTextColor(new java.awt.Color(255, 255, 255));
-        jTextField1.setEnabled(false);
+        txtJudul.setBackground(new java.awt.Color(230, 139, 69));
+        txtJudul.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        txtJudul.setForeground(new java.awt.Color(255, 255, 255));
+        txtJudul.setText("Judul");
+        txtJudul.setBorder(null);
+        txtJudul.setDisabledTextColor(new java.awt.Color(255, 255, 255));
+        txtJudul.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 16, 0);
-        jPanel2.add(jTextField1, gridBagConstraints);
+        jPanel2.add(txtJudul, gridBagConstraints);
 
         jDateChooser1.setBackground(new java.awt.Color(230, 139, 69));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -154,10 +174,10 @@ public class CatatanFrame extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(230, 139, 69));
         jPanel3.setLayout(new java.awt.GridBagLayout());
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Plus.png"))); // NOI18N
-        jButton1.setText("Catatan Harian Baru");
-        jButton1.setToolTipText("");
+        btnCatatanBaru.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnCatatanBaru.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Plus.png"))); // NOI18N
+        btnCatatanBaru.setText("Catatan Harian Baru");
+        btnCatatanBaru.setToolTipText("");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -165,15 +185,15 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipady = 16;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 0);
-        jPanel3.add(jButton1, gridBagConstraints);
+        jPanel3.add(btnCatatanBaru, gridBagConstraints);
 
-        jList1.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        listCatatan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        listCatatan.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "-" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane2.setViewportView(jList1);
+        jScrollPane2.setViewportView(listCatatan);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -184,22 +204,22 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         jPanel3.add(jScrollPane2, gridBagConstraints);
 
-        jButton4.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Import CSV.png"))); // NOI18N
+        btnEkspor.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        btnEkspor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Import CSV.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 0);
-        jPanel3.add(jButton4, gridBagConstraints);
+        jPanel3.add(btnEkspor, gridBagConstraints);
 
-        jButton6.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
-        jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Export CSV.png"))); // NOI18N
+        btnImpor.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        btnImpor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Export CSV.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
-        jPanel3.add(jButton6, gridBagConstraints);
+        jPanel3.add(btnImpor, gridBagConstraints);
 
         jPanel4.setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -208,14 +228,14 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 2;
         jPanel3.add(jPanel4, gridBagConstraints);
 
-        jButton7.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Trash.png"))); // NOI18N
+        btnHapus.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        btnHapus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Trash.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 11, 11);
-        jPanel3.add(jButton7, gridBagConstraints);
+        jPanel3.add(btnHapus, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -281,16 +301,15 @@ public class CatatanFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton btnCatatanBaru;
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnEkspor;
+    private javax.swing.JButton btnHapus;
+    private javax.swing.JButton btnImpor;
+    private javax.swing.JButton btnSimpan;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -299,7 +318,8 @@ public class CatatanFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JList<String> listCatatan;
+    private javax.swing.JTextArea txtCatatan;
+    private javax.swing.JTextField txtJudul;
     // End of variables declaration//GEN-END:variables
 }
