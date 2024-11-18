@@ -27,7 +27,10 @@ public class CatatanFrame extends javax.swing.JFrame {
      */
     public CatatanFrame() {
         initComponents();
-        
+        connectToDatabase(); // Hubungkan ke database
+        listModel = new DefaultListModel<>();
+        listCatatan.setModel(listModel);
+        loadCatatan(); // Muat catatan dari database
     }
     
     private Connection conn; // Koneksi ke SQLite
@@ -39,6 +42,107 @@ public class CatatanFrame extends javax.swing.JFrame {
             System.out.println("Koneksi berhasil ke database!");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Koneksi database gagal: " + e.getMessage());
+        }
+    }
+    
+    private void loadCatatan() {
+        listModel.clear();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
+            while (rs.next()) {
+                listModel.addElement(rs.getString("judul"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat data: " + e.getMessage());
+        }
+    }
+    
+    private void simpanCatatan(String judul, String catatan, String tanggal) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO catatan (judul, catatan, tanggal) VALUES (?, ?, ?)")) {
+            stmt.setString(1, judul);
+            stmt.setString(2, catatan);
+            stmt.setString(3, tanggal);
+            stmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Catatan berhasil disimpan!");
+            loadCatatan();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal menyimpan catatan: " + e.getMessage());
+        }
+    }
+    
+    private void updateCatatan(int id, String judul, String catatan, String tanggal) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE catatan SET judul = ?, catatan = ?, tanggal = ? WHERE id = ?")) {
+            stmt.setString(1, judul);
+            stmt.setString(2, catatan);
+            stmt.setString(3, tanggal);
+            stmt.setInt(4, id);
+            stmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Catatan berhasil diupdate!");
+            loadCatatan();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal mengupdate catatan: " + e.getMessage());
+        }
+    }
+    
+    private void hapusCatatan(int id) {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "DELETE FROM catatan WHERE id = ?")) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Catatan berhasil dihapus!");
+            loadCatatan();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal menghapus catatan: " + e.getMessage());
+        }
+    }
+    
+    private int getIdFromJudul(String judul) {
+        int id = -1; // Default jika tidak ditemukan
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT id FROM catatan WHERE judul = ?")) {
+            stmt.setString(1, judul); // Ganti placeholder (?) dengan judul
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("id"); // Ambil ID dari hasil query
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal mendapatkan ID dari judul: " + e.getMessage());
+        }
+        return id; // Kembalikan ID
+    }
+
+    
+    private void eksporCSV(File file) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            writer.println("ID,Judul,Catatan,Tanggal");
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
+                while (rs.next()) {
+                    writer.println(rs.getInt("id") + "," +
+                                   rs.getString("judul") + "," +
+                                   rs.getString("catatan") + "," +
+                                   rs.getString("tanggal"));
+                }
+            }
+            JOptionPane.showMessageDialog(this, "Data berhasil diekspor ke CSV!");
+        } catch (IOException | SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal mengekspor CSV: " + e.getMessage());
+        }
+    }
+    
+    private void imporCSV(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine(); // Skip header
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                simpanCatatan(data[1], data[2], data[3]);
+            }
+            JOptionPane.showMessageDialog(this, "Data berhasil diimpor dari CSV!");
+            loadCatatan();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Gagal mengimpor CSV: " + e.getMessage());
         }
     }
 
@@ -61,7 +165,7 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnSimpan = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         txtJudul = new javax.swing.JTextField();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        jDateChooser = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
         btnCatatanBaru = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -103,6 +207,11 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnEdit.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Edit.png"))); // NOI18N
         btnEdit.setText("Edit");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -114,6 +223,11 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnSimpan.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnSimpan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Save.png"))); // NOI18N
         btnSimpan.setText("Simpan");
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -155,14 +269,14 @@ public class CatatanFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 16, 0);
         jPanel2.add(txtJudul, gridBagConstraints);
 
-        jDateChooser1.setBackground(new java.awt.Color(230, 139, 69));
+        jDateChooser.setBackground(new java.awt.Color(230, 139, 69));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 20;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
-        jPanel2.add(jDateChooser1, gridBagConstraints);
+        jPanel2.add(jDateChooser, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -178,6 +292,11 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnCatatanBaru.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Plus.png"))); // NOI18N
         btnCatatanBaru.setText("Catatan Harian Baru");
         btnCatatanBaru.setToolTipText("");
+        btnCatatanBaru.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCatatanBaruActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -206,6 +325,11 @@ public class CatatanFrame extends javax.swing.JFrame {
 
         btnEkspor.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         btnEkspor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Import CSV.png"))); // NOI18N
+        btnEkspor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEksporActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -215,6 +339,11 @@ public class CatatanFrame extends javax.swing.JFrame {
 
         btnImpor.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         btnImpor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Export CSV.png"))); // NOI18N
+        btnImpor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImporActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -230,6 +359,11 @@ public class CatatanFrame extends javax.swing.JFrame {
 
         btnHapus.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         btnHapus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Trash.png"))); // NOI18N
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -280,6 +414,56 @@ public class CatatanFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnCatatanBaruActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCatatanBaruActionPerformed
+        txtJudul.setEnabled(true);
+        txtCatatan.setEnabled(true);
+        btnSimpan.setEnabled(true);
+    }//GEN-LAST:event_btnCatatanBaruActionPerformed
+
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        String judul = txtJudul.getText();
+        String catatan = txtCatatan.getText();
+        String tanggal = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
+        simpanCatatan(judul, catatan, tanggal);
+    }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        txtJudul.setEnabled(true);
+        txtCatatan.setEnabled(true);
+        btnSimpan.setEnabled(true);
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih di JList
+        if (selectedJudul != null) {
+            int result = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus catatan \"" + selectedJudul + "\"?");
+            if (result == JOptionPane.YES_OPTION) {
+                int id = getIdFromJudul(selectedJudul); // Ambil ID dari judul
+                if (id != -1) {
+                    hapusCatatan(id); // Hapus catatan berdasarkan ID
+                } else {
+                    JOptionPane.showMessageDialog(this, "ID tidak ditemukan untuk judul: " + selectedJudul);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Pilih catatan untuk dihapus!");
+        }
+    }//GEN-LAST:event_btnHapusActionPerformed
+
+    private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            eksporCSV(fileChooser.getSelectedFile());
+        }
+    }//GEN-LAST:event_btnEksporActionPerformed
+
+    private void btnImporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImporActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            imporCSV(fileChooser.getSelectedFile());
+        }
+    }//GEN-LAST:event_btnImporActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -308,7 +492,7 @@ public class CatatanFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnImpor;
     private javax.swing.JButton btnSimpan;
     private javax.swing.JButton jButton5;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
+    private com.toedter.calendar.JDateChooser jDateChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
