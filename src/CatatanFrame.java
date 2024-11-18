@@ -1,14 +1,8 @@
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import javax.swing.UIManager;
-import com.toedter.calendar.JDateChooser; // Untuk JDateChooser
 import java.sql.*; // Untuk SQLite
 import javax.swing.*; // Untuk Swing
-import javax.swing.filechooser.FileNameExtensionFilter; // Untuk FileChooser
 import java.io.*; // Untuk ekspor dan impor CSV
 import java.text.SimpleDateFormat; // Untuk format tanggal
 
@@ -38,37 +32,62 @@ public class CatatanFrame extends javax.swing.JFrame {
     private Connection conn; // Koneksi ke SQLite
     private DefaultListModel<String> listModel; // Model untuk JList
     
-    private void connectToDatabase() {
+    private void connectToDatabase() { //menghubungkan ke database
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:E:/kuliah/PBO2/Muhammad_Husnu_Elwafa-2210010318-UTS/src/catatan.db");
-            System.out.println("Koneksi berhasil ke database!");
+            //mencari file catatan.db
+            conn = DriverManager.getConnection("jdbc:sqlite:E:/kuliah/PBO2/Muhammad_Husnu_Elwafa-2210010318-UTS/src/catatan.db"); 
+            
+            //menngkonfirmasi jika database berhasil terkoneksi
+            System.out.println("Koneksi berhasil ke database!"); 
         } catch (SQLException e) {
+            
+            //memunculkan message box jika koneksinya gagal
             JOptionPane.showMessageDialog(this, "Koneksi database gagal: " + e.getMessage());
         }
     }
     
-    private void loadCatatan() {
+    //method untuk mengambil text dari judul yang dimasukkan untuk ditampilkan di JList
+    private void loadCatatan() { 
         listModel.clear();
         try (Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
             while (rs.next()) {
+                
+                //mengambil text dari judul untuk ditambahkan ke dalam element JList
                 listModel.addElement(rs.getString("judul"));
             }
         } catch (SQLException e) {
+            
+            //memunculkan message box jika gagal memuat data
             JOptionPane.showMessageDialog(this, "Gagal memuat data: " + e.getMessage());
         }
     }
     
+    //method untuk menyimpan catatan ke dalam table database
     private void simpanCatatan(String judul, String catatan, String tanggal) {
+        
+        //Membuat PreparedStatement menggunakan koneksi database
         try (PreparedStatement stmt = conn.prepareStatement(
+            
+            //sintak sqlite untuk menambahkan data
             "INSERT INTO catatan (judul, catatan, tanggal) VALUES (?, ?, ?)")) {
+            
+            //Mengisi placeholder (?) dalam query dengan nilai dari variabel judul, catatan, dan tanggal.
             stmt.setString(1, judul);
             stmt.setString(2, catatan);
             stmt.setString(3, tanggal);
+            
+            //Menjalankan perintah SQL INSERT INTO untuk menambahkan data baru ke tabel catatan
             stmt.executeUpdate();
+            
+            //menngkonfirmasi catatan berhasil disimpan
             JOptionPane.showMessageDialog(this, "Catatan berhasil disimpan!");
+            
+            //memanggil method untuk menampilkan semua catatan dan memperbarui daftar catatan di antarmuka (JList).
             loadCatatan();
         } catch (SQLException e) {
+            
+            ////memunculkan message box jika gagal memuat catatan
             JOptionPane.showMessageDialog(this, "Gagal menyimpan catatan: " + e.getMessage());
         }
     }
