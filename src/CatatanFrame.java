@@ -629,6 +629,8 @@ public class CatatanFrame extends javax.swing.JFrame {
 
     //event saat daftar judul di JList dipilih
     private void listCatatanValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listCatatanValueChanged
+       btnSimpan.setEnabled(false);
+       btnSimpanEdit.setEnabled(false);
         if (!evt.getValueIsAdjusting()) { // Mencegah event dipicu dua kali
             String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih
             if (selectedJudul != null) {
