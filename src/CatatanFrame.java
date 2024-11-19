@@ -87,29 +87,51 @@ public class CatatanFrame extends javax.swing.JFrame {
             loadCatatan();
         } catch (SQLException e) {
             
-            ////memunculkan message box jika gagal memuat catatan
+            //memunculkan message box jika gagal menyimpan catatan
             JOptionPane.showMessageDialog(this, "Gagal menyimpan catatan: " + e.getMessage());
         }
     }
     
+    //method untuk memperbarui data catatan
     private void updateCatatan(int id, String judul, String catatan, String tanggal) {
+        
+        //Membuat PreparedStatement menggunakan koneksi database
         try (PreparedStatement stmt = conn.prepareStatement(
+                
+                //sintak sqlite untuk mengupdate data
                 "UPDATE catatan SET judul = ?, catatan = ?, tanggal = ? WHERE id = ?")) {
+            
+            //Mengisi placeholder (?) dalam query dengan nilai dari variabel judul, catatan, tanggal dan id.
             stmt.setString(1, judul);
             stmt.setString(2, catatan);
             stmt.setString(3, tanggal);
             stmt.setInt(4, id);
+            
+            //Menjalankan perintah SQL UPDATE INTO untuk memperbarui data ke tabel catatan
             stmt.executeUpdate();
+            
+            //menngkonfirmasi catatan berhasil diperbarui
             JOptionPane.showMessageDialog(this, "Catatan berhasil diupdate!");
+            
+            //memanggil method untuk menampilkan semua catatan dan memperbarui daftar catatan di antarmuka (JList).
             loadCatatan();
         } catch (SQLException e) {
+            
+            //memunculkan message box jika gagal memperbarui catatan
             JOptionPane.showMessageDialog(this, "Gagal mengupdate catatan: " + e.getMessage());
         }
     }
     
+    //method untuk menampilkan data ke dalam komponen saat judul dipilih di daftar JList
     private void tampilkanDataCatatan(String judul) {
+        
+        //Membuat PreparedStatement menggunakan koneksi database
         try (PreparedStatement stmt = conn.prepareStatement(
+                
+                //sintak sqlite untuk menampilkan isi data pada tabel berdasarkan judul
                 "SELECT * FROM catatan WHERE judul = ?")) {
+            
+            //Mengisi placeholder (?) dalam query dengan nilai dari variabel judul.
             stmt.setString(1, judul);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -129,26 +151,48 @@ public class CatatanFrame extends javax.swing.JFrame {
                 }
             }
         } catch (Exception e) {
+            
+            //memunculkan message box jika gagal menampilkan catatan
             JOptionPane.showMessageDialog(this, "Gagal menampilkan data: " + e.getMessage());
         }
     }
 
-    
+    //method untuk menghapus catatan
     private void hapusCatatan(int id) {
+        
+        //Membuat PreparedStatement menggunakan koneksi database
         try (PreparedStatement stmt = conn.prepareStatement(
+                
+                //sintak sqlite untuk menghapus data berdasarkan id
                 "DELETE FROM catatan WHERE id = ?")) {
+            
+            //Mengisi placeholder (?) dalam query dengan nilai dari variabel id.
             stmt.setInt(1, id);
+            
+            //Menjalankan perintah SQL DELETE untuk menghapus data
             stmt.executeUpdate();
+            
+            //mengkonfirmasi catatan berhasil dihapus
             JOptionPane.showMessageDialog(this, "Catatan berhasil dihapus!");
+            
+            //memanggil method untuk menampilkan semua catatan dan memperbarui daftar catatan di antarmuka (JList).
             loadCatatan();
         } catch (SQLException e) {
+            
+            //memunculkan message box jika gagal menghapus catatan
             JOptionPane.showMessageDialog(this, "Gagal menghapus catatan: " + e.getMessage());
         }
     }
     
+    //method untuk mengambil id dari judul
     private int getIdFromJudul(String judul) {
         int id = -1; // Default jika tidak ditemukan
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT id FROM catatan WHERE judul = ?")) {
+        
+        //Membuat PreparedStatement menggunakan koneksi database
+        try (PreparedStatement stmt = conn.prepareStatement(
+                
+                //sintak sqlite untuk mengambil id berdasarkan judul
+                "SELECT id FROM catatan WHERE judul = ?")) {
             stmt.setString(1, judul); // Ganti placeholder (?) dengan judul
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -156,17 +200,27 @@ public class CatatanFrame extends javax.swing.JFrame {
                 }
             }
         } catch (SQLException e) {
+            
+            //memunculkan message box jika gagal mendapatkan id
             JOptionPane.showMessageDialog(this, "Gagal mendapatkan ID dari judul: " + e.getMessage());
         }
         return id; // Kembalikan ID
     }
 
-    
+    //method untuk mengekspor data dari database ke file csv
     private void eksporCSV(File file) {
+        
+        //Membuka PrintWriter untuk Menulis ke File
         try (PrintWriter writer = new PrintWriter(file)) {
+            
+            //menulis header csv
             writer.println("ID,Judul,Catatan,Tanggal");
+            
+            //Menjalankan query SQL untuk mengambil semua data dari tabel catatan
             try (Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery("SELECT * FROM catatan")) {
+                
+                //menulis data ke file .csv
                 while (rs.next()) {
                     writer.println(rs.getInt("id") + "," +
                                    rs.getString("judul") + "," +
@@ -174,22 +228,35 @@ public class CatatanFrame extends javax.swing.JFrame {
                                    rs.getString("tanggal"));
                 }
             }
+            
+            //mengkonfirmasi bahwa catatan berhasil diekspor
             JOptionPane.showMessageDialog(this, "Data berhasil diekspor ke CSV!");
         } catch (IOException | SQLException e) {
+            
+            //memunculkan message box jika gagal gagal mengekspor
             JOptionPane.showMessageDialog(this, "Gagal mengekspor CSV: " + e.getMessage());
         }
     }
     
+    //method untuk mengimpor data eksternal ke dalam aplikasi
     private void imporCSV(File file) {
+        
+        //membaca isi file csv
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line = reader.readLine(); // Skip header
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 simpanCatatan(data[1], data[2], data[3]);
             }
+            
+            //mengkonfirmasi bahwa catatan berhasil diimpor
             JOptionPane.showMessageDialog(this, "Data berhasil diimpor dari CSV!");
+            
+            //memanggil method untuk menampilkan semua catatan dan memperbarui daftar catatan di antarmuka (JList).
             loadCatatan();
         } catch (IOException e) {
+            
+            //memunculkan message box jika gagal gagal mengimpor
             JOptionPane.showMessageDialog(this, "Gagal mengimpor CSV: " + e.getMessage());
         }
     }
@@ -462,34 +529,51 @@ public class CatatanFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //event saat tombol catatan baru ditekan
     private void btnCatatanBaruActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCatatanBaruActionPerformed
+        
+        //mengaktifkan komponen jDateChooser, txtJudul, txtCatatan dan btnSimpan
         jDateChooser.setEnabled(true);
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
         btnSimpan.setEnabled(true);
         
-        jDateChooser.setCalendar(null);
-        txtJudul.setText("Judul");
-        txtCatatan.setText("");
-        jDateChooser.requestFocusInWindow();
-    }//GEN-LAST:event_btnCatatanBaruActionPerformed
-
-    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        String judul = txtJudul.getText();
-        String catatan = txtCatatan.getText();
-        String tanggal = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
-        simpanCatatan(judul, catatan, tanggal);
+        //mengosongkan komponen jDateChooser, txtJudul, txtCatatan dan btnSimpan
         jDateChooser.setCalendar(null);
         txtJudul.setText("Judul");
         txtCatatan.setText("");
         
+        //memberikan fokus kepada JDateChooser
+        jDateChooser.requestFocusInWindow();
+    }//GEN-LAST:event_btnCatatanBaruActionPerformed
+
+    //event saat tombol simpan ditekan
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        
+        //mengambil inputan yang dimasukkan dan menyimpannya pada variable yang sesuai
+        String judul = txtJudul.getText();
+        String catatan = txtCatatan.getText();
+        String tanggal = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
+        
+        //menjalankan method simpanCatatan
+        simpanCatatan(judul, catatan, tanggal);
+        
+        //mengosongkan komponen seperti jDateChooser, txtJudul, txtCatatan 
+        jDateChooser.setCalendar(null);
+        txtJudul.setText("Judul");
+        txtCatatan.setText("");
+        
+        //menonaktifkan beberapa komponen
         jDateChooser.setEnabled(false);
         txtJudul.setEnabled(false);
         txtCatatan.setEnabled(false);
         btnSimpan.setEnabled(false);
     }//GEN-LAST:event_btnSimpanActionPerformed
 
+    //event saat tombol edit ditekan
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        
+        //mengaktifkan komponen jDateChooser, txtJudul, txtCatatan, btnSimpan dan btnSimpanEdit
         jDateChooser.setEnabled(true);
         txtJudul.setEnabled(true);
         txtCatatan.setEnabled(true);
@@ -497,11 +581,12 @@ public class CatatanFrame extends javax.swing.JFrame {
         btnSimpanEdit.setEnabled(true);
     }//GEN-LAST:event_btnEditActionPerformed
 
-    
-    
+    //event saat tombol hapus ditekan
     private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
         String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih di JList
         if (selectedJudul != null) {
+            
+            //menampilkan message box konfirmasi hapus
             int result = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus catatan \"" + selectedJudul + "\"?");
             if (result == JOptionPane.YES_OPTION) {
                 int id = getIdFromJudul(selectedJudul); // Ambil ID dari judul
@@ -512,24 +597,37 @@ public class CatatanFrame extends javax.swing.JFrame {
                 }
             }
         } else {
+            
+            //menampilkan message box jika catatan belum dipilih
             JOptionPane.showMessageDialog(this, "Pilih catatan untuk dihapus!");
         }
     }//GEN-LAST:event_btnHapusActionPerformed
 
+    //event saat tombol ekspor ditekan
     private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
+        
+        //menampilkan filechooser untuk memilih lokasi simpan file .csv
         JFileChooser fileChooser = new JFileChooser();
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            
+            //menjalankan method eksporCSV
             eksporCSV(fileChooser.getSelectedFile());
         }
     }//GEN-LAST:event_btnEksporActionPerformed
 
+    //event saat tombol ekspor ditekan
     private void btnImporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImporActionPerformed
+        
+        //menampilkan filechooser untuk memilih file .csv yang ingin diimpor
         JFileChooser fileChooser = new JFileChooser();
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            
+            //menjalankan method imporCSV
             imporCSV(fileChooser.getSelectedFile());
         }
     }//GEN-LAST:event_btnImporActionPerformed
 
+    //event saat daftar judul di JList dipilih
     private void listCatatanValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listCatatanValueChanged
         if (!evt.getValueIsAdjusting()) { // Mencegah event dipicu dua kali
             String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul yang dipilih
@@ -552,20 +650,28 @@ public class CatatanFrame extends javax.swing.JFrame {
                         }
                     }
                 } catch (Exception ex) {
+                    //menampilkan message box jika catatan belum dipilih
                     JOptionPane.showMessageDialog(this, "Gagal memuat data: " + ex.getMessage());
                 }
             }
         }
     }//GEN-LAST:event_listCatatanValueChanged
 
+    //event saat tombol simpan edit ditekan
     private void btnSimpanEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanEditActionPerformed
+        
+        //mengambil inputan yang dimasukkan dan menyimpannya pada variable yang sesuai
         String judulBaru = txtJudul.getText();
         String catatanBaru = txtCatatan.getText();
         String tanggalBaru = new SimpleDateFormat("yyyy-MM-dd").format(jDateChooser.getDate());
         String selectedJudul = listCatatan.getSelectedValue(); // Ambil judul asli dari JList
 
         if (selectedJudul != null) {
+            
+            //Membuat PreparedStatement menggunakan koneksi database
             try (PreparedStatement stmt = conn.prepareStatement(
+                    
+                    //sintak sqlite untuk mengupdate data
                     "UPDATE catatan SET judul = ?, catatan = ?, tanggal = ? WHERE judul = ?")) {
                 stmt.setString(1, judulBaru); // Judul baru
                 stmt.setString(2, catatanBaru); // Isi catatan baru
@@ -581,9 +687,13 @@ public class CatatanFrame extends javax.swing.JFrame {
                 txtCatatan.setEnabled(false);
                 jDateChooser.setEnabled(false);
             } catch (SQLException ex) {
+                
+                //menampilkan message box jika gagal memperbarui catatan
                 JOptionPane.showMessageDialog(this, "Gagal memperbarui catatan: " + ex.getMessage());
             }
         } else {
+            
+            //menampilkan message box jika catatan belum dipilih
             JOptionPane.showMessageDialog(this, "Pilih catatan untuk diperbarui!");
         }
     }//GEN-LAST:event_btnSimpanEditActionPerformed
