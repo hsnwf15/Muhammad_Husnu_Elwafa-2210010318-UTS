@@ -87,6 +87,7 @@ Aplikasi menggunakan SQLite sebagai database. Tabel utama bernama `catatan` deng
 File CSV yang digunakan untuk impor/ekspor memiliki format berikut:
 
 ### Ekspor csv
+```java
 private void eksporCSV(File file) {
     try (PrintWriter writer = new PrintWriter(file)) {
         writer.println("ID,Judul,Catatan,Tanggal");
@@ -104,8 +105,10 @@ private void eksporCSV(File file) {
         JOptionPane.showMessageDialog(this, "Gagal mengekspor CSV: " + e.getMessage());
     }
 }
+```
 
 ### Impor csv
+```java
 private void imporCSV(File file) {
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
         String line = reader.readLine(); // Skip header
@@ -119,7 +122,7 @@ private void imporCSV(File file) {
         JOptionPane.showMessageDialog(this, "Gagal mengimpor CSV: " + e.getMessage());
     }
 }
-
+```
 
 `ID,Judul,Catatan,Tanggal 1,Belajar Java Swing,Hari ini belajar dasar-dasar Java Swing,2024-11-18 2,Meeting Tim,Diskusi proyek,2024-11-19`
 
@@ -130,7 +133,9 @@ private void imporCSV(File file) {
 
 ---
 
-##**Tampilan Aplikasi**
+## **Tampilan Aplikasi**
+
+###
 
 ---
 
