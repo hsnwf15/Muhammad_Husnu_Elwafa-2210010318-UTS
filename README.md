@@ -135,7 +135,28 @@ private void imporCSV(File file) {
 
 ## **Tampilan Aplikasi**
 
-###
+- ### tampilan awal aplikasi
+  ![](tampilanawal.PNG)
+  
+- ### memasukkan tanggal, judul dan catatannya
+  ![](input.PNG)
+  
+- ### melakukan pengeditan data pada tanggal 
+  ![](edit.PNG)
+  
+- ### menghapus catatan yang dipilih
+  ![](hapus.PNG)
+    
+- ### mengimpor file .csv eksternal ke dalam aplikasi
+  ![](importchoose.PNG)
+  
+  ![](importdone.PNG)
+  
+- ### mengeskpor catatan ke dalam bentuk file .csv
+  ![](exportchoose.PNG)
+    
+- ### hasil export
+  ![](csv.PNG)
 
 ---
 
